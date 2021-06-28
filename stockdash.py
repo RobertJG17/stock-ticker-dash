@@ -87,10 +87,9 @@ app.layout = html.Div(
                                 width="400px",
                                 fontSize=24,
                                 height="48px",
-                                display="flex",
-                                flexFlow="row",
-                                flexWrap="wrap",
-                                verticalAlign="middle"
+                                display="inline-block",
+                                verticalAlign="middle",
+                                fontColor="black"
                             )
                         )
                     ],

@@ -1,3 +1,8 @@
 .Select-control {
     overflow-y:auto;   
 }
+
+.Select.has-value.is-clearable.is-searchable.Select--multi {
+    color:black;
+    font-size:15px;
+}
