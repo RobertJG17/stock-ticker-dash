@@ -177,7 +177,9 @@ app.layout = html.Div(
 
                             yaxis=dict(
                                 title="Closing Price",
-                            )
+                            ),
+
+                            plot_bgcolor="black"
                         )
                     )
                 )
@@ -246,7 +248,9 @@ def update_ticker_graph(_, symbols, start_date, end_date):
 
             yaxis=dict(
                 title="Closing Price",
-            )
+            ),
+
+            plot_bgcolor="black"
         )
     )
 
