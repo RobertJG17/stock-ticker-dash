@@ -11,8 +11,8 @@ import pytickersymbols
 
 
 # Initialize Application
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 
 # Ticker / Company Info
 sap_code = pytickersymbols.Statics().Indices().US_SP_500
@@ -133,6 +133,7 @@ app.layout = html.Div(
                             children="Submit",
 
                         )
+                            
                     ],
 
                     style=dict(
@@ -240,8 +241,8 @@ def update_ticker_graph(_, symbols, start_date, end_date):
     return dict(
         data=[
             go.Scatter(
-                x=yf.download(symbol, start=start_date, end=end_date)["Close"].index,
-                y=yf.download(symbol, start=start_date, end=end_date)["Close"].values,
+                x=yf.download(symbol, start=start_date, end=end_date, progress = False)["Close"].index,
+                y=yf.download(symbol, start=start_date, end=end_date, progress= False)["Close"].values,
                 mode="lines",
                 name=symbol,
                 line=dict(
@@ -249,7 +250,6 @@ def update_ticker_graph(_, symbols, start_date, end_date):
                 )
             ) for symbol in symbols
         ],
-
         layout=go.Layout(
             title="Closing Prices for: {}".format(', '.join(symbols)),
             xaxis=dict(
@@ -268,7 +268,6 @@ def update_ticker_graph(_, symbols, start_date, end_date):
             )
         )
     )
-
 
 @app.callback(Output('card-output', 'children'),
               [Input('state-button', 'n_clicks')],
