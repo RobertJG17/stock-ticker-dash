@@ -11,22 +11,47 @@ import pytickersymbols
 
 
 # Initialize Application
-app = dash.Dash()
+app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 
-# TICKER / COMPANY INFO
+# Ticker / Company Info
 sap_code = pytickersymbols.Statics().Indices().US_SP_500
 sap_filter = pytickersymbols.PyTickerSymbols().get_stocks_by_index(index=sap_code)
 sap_df = pd.DataFrame.from_records(sap_filter).set_index("symbol")
 tickers = sap_df.index
 
 
-# MAIN APPLICATION LAYOUT
+# Helper Functions
+def create_card(comp, founded, employees):
+    return dbc.Card(
+            [
+                dbc.CardBody(
+                    [
+                        html.H4(comp, className="card-title"),
+                        html.P(f"Est: {founded}", className="card-text"),
+                    ]
+                ),
+                dbc.CardFooter(f"Employees: {employees}"),
+            ],
+            style=dict(
+                width="18rem",
+                margin="5px"
+            )
+    )
+
+
+# Main application layout
 app.layout = html.Div(
     [
         html.H1(
-            "Stock Ticker Dashboard"
+            "Stock Ticker Dashboard",
+            style=dict(
+                fontSize=80,
+                fontFamily='Copperplate, fantasy'
+            )
         ),
+
+        html.Hr(),
 
         # LEVEL 1 Div holding inner divs for both of our DCC and H3 components
         html.Div(
@@ -34,10 +59,18 @@ app.layout = html.Div(
                 html.Div(
                     [
                         html.H3(
-                            "Select Stock Name"
+                            "Select Stock Name",
+
+                            style=dict(
+                                fontSize=30,
+                                fontFamily='Frutiger, Frutiger Linotype, Univers, Calibri, Gill Sans, Gill Sans MT, Myriad Pro, Myriad,\
+                 DejaVu Sans Condensed, Liberation Sans, Nimbus Sans L, Tahoma, Geneva, Helvetica Neue, \
+                 Helvetica, Arial, sans-serif'
+                            )
                         ),
 
                         # DROPDOWN MENU TO SELECT STOCK INDEX#
+
                         dcc.Dropdown(
                             id='stock-input',
                             options=[
@@ -51,7 +84,13 @@ app.layout = html.Div(
                             multi=True,
                             searchable=True,
                             style=dict(
-                                width="400px"
+                                width="400px",
+                                fontSize=24,
+                                height="48px",
+                                display="flex",
+                                flexFlow="row",
+                                flexWrap="wrap",
+                                verticalAlign="middle"
                             )
                         )
                     ],
@@ -64,7 +103,14 @@ app.layout = html.Div(
                 html.Div(
                     [
                         html.H3(
-                            "Select Start and End Dates"
+                            "Select Start and End Dates",
+
+                            style=dict(
+                                fontSize=30,
+                                fontFamily='Frutiger, Frutiger Linotype, Univers, Calibri, Gill Sans, Gill Sans MT, Myriad Pro, Myriad,\
+                 DejaVu Sans Condensed, Liberation Sans, Nimbus Sans L, Tahoma, Geneva, Helvetica Neue, \
+                 Helvetica, Arial, sans-serif'
+                            )
                         ),
 
                         # DCC DATE PICKER MENU
@@ -73,26 +119,37 @@ app.layout = html.Div(
                             start_date='2016-01-04',
                             end_date='2017-12-29',
                             style=dict(
-                                font="Times New Roman"
-                            )
-                        ),
+                                border=0
 
-                        html.Button(
-                            id="state-button",
-                            children="Submit",
-                            style=dict(
-                                height="43%"
                             )
                         )
                     ]
+                ),
+
+                html.Div(
+                    [
+                        html.Button(
+                            id="state-button",
+                            children="Submit",
+
+                        )
+                    ],
+
+                    style=dict(
+                        marginTop="3%"
+                    )
                 )
             ],
 
             style=dict(
                 display="flex",
-                flexDirection="row"
+                flexDirection="row",
+                verticalAlign="middle",
+                alignItems="center"
             )
         ),
+
+        html.Hr(),
 
         html.Div(
             [
@@ -127,19 +184,37 @@ app.layout = html.Div(
             ]
         ),
 
+        html.Hr(
+            style=dict(
+                marginTop="40px"
+            )
+        ),
+
         html.Div(
             [
+                html.H1(
+                    "Selected Company Info:",
 
-                dbc.CardGroup(
-                    id='card-group',
+                    style=dict(
+                        fontFamily='Copperplate, fantasy'
+                    )
+                ),
+
+                html.Hr(),
+
+                html.Div(
+                    id="card-output"
                 )
             ],
 
             style=dict(
-                fontSize=20
+                marginTop="50px"
             )
         )
-    ]
+    ],
+    style=dict(
+        padding="40px"
+    )
 )
 
 
@@ -176,24 +251,28 @@ def update_ticker_graph(_, symbols, start_date, end_date):
     )
 
 
-@app.callback(Output('div-card', 'children'),
+@app.callback(Output('card-output', 'children'),
               [Input('state-button', 'n_clicks')],
               [State('stock-input', 'value')])
 def callback_stats(_, value):
-    meta = [
-        # dbc.Card(
-        #
-        # ),
-        f"""
-        ```
-            Company: {sap_df.loc[data]['name']}
-            Founded: {sap_df.loc[data]['metadata']['founded']}
-            Employees: {sap_df.loc[data]['metadata']['employees']}
-        ```
-        """
-    for data in value]
 
-    return meta
+    meta = []
+    for val in value:
+        card = create_card(comp=val, founded=sap_df.loc[val]['metadata']['founded'],
+                        employees=sap_df.loc[val]['metadata']['employees'])
+
+        meta.append(card)
+
+
+
+    return dbc.Row(
+        meta,
+
+        style=dict(
+            display="flex",
+            justifyContent="center"
+        )
+    )
 
 
 if __name__ == '__main__':
