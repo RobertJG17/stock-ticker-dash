@@ -11,8 +11,8 @@ import pytickersymbols
 
 
 # Initialize Application
-app = dash.Dash( __name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 
 # Ticker / Company Info
 sap_code = pytickersymbols.Statics().Indices().US_SP_500
@@ -171,16 +171,26 @@ app.layout = html.Div(
                         ],
 
                         layout=go.Layout(
-                            title="Closing Prices for: {}".format(', '.join(["TSLA", "AAPL"])),
+                            title=dict(
+                                text="Closing Prices for: {}".format(', '.join(["TSLA", "AAPL"])),
+                                font=dict(
+                                    color="white"
+                                )
+                            ),
                             xaxis=dict(
-                                title="Date",
+                                title="Date"
                             ),
 
                             yaxis=dict(
                                 title="Closing Price",
                             ),
 
-                            plot_bgcolor="black"
+                            plot_bgcolor="black",
+                            paper_bgcolor="black",
+
+                            font=dict(
+                                color="white"
+                            )
                         )
                     )
                 )
@@ -250,7 +260,12 @@ def update_ticker_graph(_, symbols, start_date, end_date):
                 title="Closing Price",
             ),
 
-            plot_bgcolor="black"
+            plot_bgcolor="black",
+            paper_bgcolor="black",
+
+            font=dict(
+                color="white"
+            )
         )
     )
 
@@ -279,4 +294,4 @@ def callback_stats(_, value):
 
 
 if __name__ == '__main__':
-    app.run_server()
+    app.run_server('0.0.0.0', 5001)
