@@ -2,19 +2,31 @@
     overflow-y:auto;   
 }
 
-.Select.has-value.is-clearable.is-searchable.Select--multi {
+.Select {
     color:black;
     font-size:15px;
-
 }
 
-.DateInput_input.DateInput_input_1 {
-    background-color:black;
+.Select-placeholder {
+    padding-top:3px;
+    display:flex;
+    align-items:center;
 }
 
 .DateRangePickerInput {
     background-color:black;
 }
+
+.DateInput_input.DateInput_input_1 {
+    background-color:black;
+    color:#007efe;
+}
+
+.DateRangePickerInput_arrow_svg {
+    fill:#007efe;
+}
+
+
 
 
 

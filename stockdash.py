@@ -2,6 +2,7 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
+import sd_material_ui as dmu
 import pytickersymbols
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as go
@@ -14,6 +15,7 @@ from pytickersymbols import PyTickerSymbols, Statics
 # Initialize Application
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+
 
 # Ticker / Company Info
 pytick = PyTickerSymbols()
@@ -106,15 +108,14 @@ app.layout = html.Div(
 
                             value=['TSLA', 'AAPL'],
                             multi=True,
-                            searchable=True,
                             style=dict(
                                 width="400px",
                                 fontSize=24,
                                 height="48px",
                                 display="inline-block",
-                                verticalAlign="middle",
                                 backgroundColor="black"
                             )
+
                         )
                     ],
 
