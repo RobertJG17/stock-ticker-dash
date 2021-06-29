@@ -1,3 +1,5 @@
+import datetime
+
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -7,6 +9,7 @@ from dash.dependencies import Input, Output, State
 import plotly.graph_objects as go
 import pandas as pd
 
+import requests
 import yfinance as yf
 from pytickersymbols import PyTickerSymbols, Statics
 
@@ -23,13 +26,14 @@ stocks_df = pd.DataFrame.from_records(pytick.get_stocks_by_index(index=index)).s
 
 tickers = stocks_df.index
 
-print(stocks_df["metadata"])
-
+# TODO: FIND A WAY TO ADD MORE PRECISE INFO/ATTR ABOUT EACH STOCK
+print(stocks_df.iloc[0])
 
 # Helper Functions
 def create_card(comp, founded, employees):
 
     employees = "N/A" if employees == '' else employees
+    founded = "N/A" if founded == '' else founded
 
     return dbc.Card(
             [
@@ -68,6 +72,7 @@ app.layout = html.Div(
                             Helvetica, Arial, sans-serif',
                 color="white",
                 fontWeight=200,
+                textAlign="center"
             )
         ),
 
@@ -294,6 +299,7 @@ def update_ticker_graph(_, symbols, start_date, end_date):
                 y=yf.download(symbol, start=start_date, end=end_date, progress= False)["Close"].values,
                 mode="lines",
                 name=symbol,
+
                 line=dict(
                     width=1
                 )
@@ -325,12 +331,16 @@ def update_ticker_graph(_, symbols, start_date, end_date):
 @app.callback(Output('card-output', 'children'),
               [Input('state-button', 'n_clicks')],
               [State('stock-input', 'value')])
-def callback_stats(_, value):
+def callback_stats(_, value, start_date, end_date):
 
     meta = []
+
     for val in value:
-        card = create_card(comp=val, founded=stocks_df.loc[val]['metadata']['founded'],
-                        employees=stocks_df.loc[val]['metadata']['employees'])
+        founded = stocks_df.loc[val]['metadata']['founded']
+        employees = stocks_df.loc[val]['metadata']['employees']
+
+
+        card = create_card(comp=val, founded=founded, employees=employees)
 
         meta.append(card)
 
