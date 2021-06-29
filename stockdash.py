@@ -2,7 +2,6 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
-import sd_material_ui as dmu
 import pytickersymbols
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as go
@@ -120,7 +119,6 @@ app.layout = html.Div(
                     ],
 
                     style=dict(
-                        margin="auto"
                         # marginRight="10px",
                         # marginTop="5px",
                         # flexDirection="row"
@@ -169,7 +167,7 @@ app.layout = html.Div(
 
             style=dict(
                 display="flex",
-                margin="auto"
+                justifyContent="space-evenly"
                 # verticalAlign="middle",
                 # alignItems="center",
                 # alignText="center"
