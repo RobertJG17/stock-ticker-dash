@@ -90,8 +90,9 @@ app.layout = html.Div(
                                 fontFamily="Frutiger, Frutiger Linotype, Univers, Calibri, Gill Sans, Gill Sans MT, Myriad Pro, Myriad,\
                             DejaVu Sans Condensed, Liberation Sans, Nimbus Sans L, Tahoma, Geneva, Helvetica Neue, \
                             Helvetica, Arial, sans-serif",
-                                fontWeight=100
-                            )
+                                fontWeight=100,
+                            ),
+                            className="header-med"
                         ),
 
                         # DROPDOWN MENU TO SELECT STOCK INDEX#
@@ -108,11 +109,12 @@ app.layout = html.Div(
                             value=['TSLA', 'AAPL'],
                             multi=True,
                             style=dict(
-                                width="400px",
+                                width="500px",
                                 fontSize=24,
-                                height="48px",
+                                height="auto",
                                 display="inline-block",
-                                backgroundColor="black"
+                                backgroundColor="black",
+                                textAlign="center"
                             )
 
                         )
@@ -125,6 +127,23 @@ app.layout = html.Div(
                     )
                 ),
 
+                html.Div([
+                    dbc.Button(
+                        id="state-button",
+                        children="Submit",
+                        style=dict(
+                            marginLeft="10px",
+                            height="48px"
+                        )
+                    )
+                ],
+                style=dict(
+                    display="flex",
+                    alignItems = "center"
+
+                )
+                ),
+
                 html.Div(
                     [
                         html.H3(
@@ -135,8 +154,10 @@ app.layout = html.Div(
                                 fontFamily='Frutiger, Frutiger Linotype, Univers, Calibri, Gill Sans, Gill Sans MT, Myriad Pro, Myriad,\
                             DejaVu Sans Condensed, Liberation Sans, Nimbus Sans L, Tahoma, Geneva, Helvetica Neue, \
                             Helvetica, Arial, sans-serif',
-                                fontWeight=100
-                            )
+                                fontWeight=100,
+                                width=500
+                            ),
+                            className="header-med"
                         ),
 
                         html.Div(
@@ -147,19 +168,14 @@ app.layout = html.Div(
                                     start_date='2016-01-04',
                                     end_date='2017-12-29',
                                     style=dict(
-                                        height="48px"
+                                        height="48px",
                                     )
                                 ),
 
-                                dbc.Button(
-                                    id="state-button",
-                                    children="Submit",
-                                    style=dict(
-                                        marginLeft="10px",
-                                        height="48px"
-                                    )
-                                )
-                            ]
+                            ],
+                            style=dict(
+                                textAlign="center"
+                            )
                         )
                     ]
                 )
