@@ -120,7 +120,10 @@ app.layout = html.Div(
                     ],
 
                     style=dict(
-                        marginRight="10px"
+                        margin="auto"
+                        # marginRight="10px",
+                        # marginTop="5px",
+                        # flexDirection="row"
                     )
                 ),
 
@@ -146,10 +149,8 @@ app.layout = html.Div(
                                     start_date='2016-01-04',
                                     end_date='2017-12-29',
                                     style=dict(
-                                        font=dict(
-                                            color="white"
-                                        )
-                                    ),
+                                        height="48px"
+                                    )
                                 ),
 
                                 dbc.Button(
@@ -160,23 +161,18 @@ app.layout = html.Div(
                                         height="48px"
                                     )
                                 )
-                            ],
-
-                            style=dict(
-                                margin="auto"
-                            )
-
+                            ]
                         )
-
                     ]
                 )
             ],
 
             style=dict(
                 display="flex",
-                flexDirection="row",
-                verticalAlign="middle",
-                alignItems="center"
+                margin="auto"
+                # verticalAlign="middle",
+                # alignItems="center",
+                # alignText="center"
             )
         ),
 

@@ -5,6 +5,12 @@
 .Select {
     color:black;
     font-size:15px;
+    border-radius:1px;
+}
+
+.Select-control {
+    border-radius:1px;
+    border-color:white;
 }
 
 .Select-placeholder {
@@ -24,6 +30,11 @@
 
 .DateRangePickerInput_arrow_svg {
     fill:#007efe;
+}
+
+.DateRangePickerInput.DateRangePickerInput_1.DateRangePickerInput__withBorder.DateRangePickerInput__withBorder_2 {
+    border-radius:1px;
+    border-color:white;
 }
 
 
