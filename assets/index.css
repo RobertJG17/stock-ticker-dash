@@ -5,12 +5,12 @@
 .Select {
     color:black;
     font-size:15px;
-    border-radius:1px;
 }
 
 .Select-control {
     border-radius:1px;
     border-color:white;
+    border: none;
 }
 
 .Select-placeholder {
@@ -37,7 +37,10 @@
     border-color:white;
 }
 
+.header-med {
+    text-align: center;
+}
 
-
-
-
+.DateRangePickerInput {
+    border: none;
+}
