@@ -38,7 +38,13 @@
 }
 
 .header-med {
-    text-align: center;
+    text-align:center;
+}
+
+.dbc-button {
+    margin-left:10px;
+    height:48px;
+    width:200px;
 }
 
 .DateRangePickerInput {

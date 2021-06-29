@@ -1,17 +1,13 @@
-import datetime
-
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
-import pytickersymbols
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as go
 import pandas as pd
 
-import requests
-import yfinance as yf
 from pytickersymbols import PyTickerSymbols, Statics
+import yfinance as yf
 
 
 # Initialize Application
@@ -19,11 +15,14 @@ from pytickersymbols import PyTickerSymbols, Statics
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 
 
-# Ticker / Company Info
+# Company Symbols
 pytick = PyTickerSymbols()
-index = Statics.Indices.US_NASDAQ
-stocks_df = pd.DataFrame.from_records(pytick.get_stocks_by_index(index=index)).set_index("symbol")
 
+# Using NASDAQ for market
+index = Statics.Indices.US_NASDAQ
+
+# Creating DataFrame full of various data related to company
+stocks_df = pd.DataFrame.from_records(pytick.get_stocks_by_index(index=index)).set_index("symbol")
 tickers = stocks_df.index
 
 # TODO: FIND A WAY TO ADD MORE PRECISE INFO/ATTR ABOUT EACH STOCK
@@ -71,14 +70,15 @@ app.layout = html.Div(
                             DejaVu Sans Condensed, Liberation Sans, Nimbus Sans L, Tahoma, Geneva, Helvetica Neue, \
                             Helvetica, Arial, sans-serif',
                 color="white",
-                fontWeight=200,
+                fontWeight=400,
                 textAlign="center"
             )
         ),
 
         html.Hr(
             style=dict(
-                backgroundColor="white"
+                backgroundColor="white",
+                marginTop="10px"
             )
         ),
 
@@ -96,6 +96,7 @@ app.layout = html.Div(
                             DejaVu Sans Condensed, Liberation Sans, Nimbus Sans L, Tahoma, Geneva, Helvetica Neue, \
                             Helvetica, Arial, sans-serif",
                                 fontWeight=100,
+                                textAlign="center"
                             ),
                             className="header-med"
                         ),
@@ -135,11 +136,12 @@ app.layout = html.Div(
                 html.Div([
                     dbc.Button(
                         id="state-button",
-                        children="Submit",
-                        style=dict(
-                            marginLeft="10px",
-                            height="48px"
-                        )
+                        children="Visualize",
+                        # style=dict(
+                        #     marginLeft="10px",
+                        #     height="48px"
+                        # ),
+                        className="dbc-button"
                     )
                 ],
                 style=dict(
@@ -160,7 +162,8 @@ app.layout = html.Div(
                             DejaVu Sans Condensed, Liberation Sans, Nimbus Sans L, Tahoma, Geneva, Helvetica Neue, \
                             Helvetica, Arial, sans-serif',
                                 fontWeight=100,
-                                width=500
+                                width=500,
+                                textAlign="center"
                             ),
                             className="header-med"
                         ),
@@ -209,8 +212,8 @@ app.layout = html.Div(
                     figure=dict(
                         data=[
                             go.Scatter(
-                                x=yf.download(symbol, start="2016-01-04", end="2017-12-29")["Close"].index,
-                                y=yf.download(symbol, start="2016-01-04", end="2017-12-29")["Close"].values,
+                                x=yf.download(symbol, start="2016-01-04", end="2017-12-29", progress=False)["Close"].index,
+                                y=yf.download(symbol, start="2016-01-04", end="2017-12-29", progress=False)["Close"].values,
                                 mode="lines",
                                 name=symbol,
                                 line=dict(
@@ -249,7 +252,7 @@ app.layout = html.Div(
 
         html.Hr(
             style=dict(
-                marginTop="40px",
+                marginTop="50px",
                 backgroundColor="white"
             )
         ),
@@ -262,7 +265,8 @@ app.layout = html.Div(
                     style=dict(
                         fontFamily='Frutiger, Frutiger Linotype, Univers, Calibri, Gill Sans, Gill Sans MT, Myriad Pro, Myriad,\
                             DejaVu Sans Condensed, Liberation Sans, Nimbus Sans L, Tahoma, Geneva, Helvetica Neue, \
-                            Helvetica, Arial, sans-serif'
+                            Helvetica, Arial, sans-serif',
+                        fontWeight=100
                     )
                 ),
 
@@ -295,8 +299,8 @@ def update_ticker_graph(_, symbols, start_date, end_date):
     return dict(
         data=[
             go.Scatter(
-                x=yf.download(symbol, start=start_date, end=end_date, progress = False)["Close"].index,
-                y=yf.download(symbol, start=start_date, end=end_date, progress= False)["Close"].values,
+                x=yf.download(symbol, start=start_date, end=end_date, progress=False)["Close"].index,
+                y=yf.download(symbol, start=start_date, end=end_date, progress=False)["Close"].values,
                 mode="lines",
                 name=symbol,
 
@@ -331,7 +335,7 @@ def update_ticker_graph(_, symbols, start_date, end_date):
 @app.callback(Output('card-output', 'children'),
               [Input('state-button', 'n_clicks')],
               [State('stock-input', 'value')])
-def callback_stats(_, value, start_date, end_date):
+def callback_stats(_, value):
 
     meta = []
 
