@@ -67,7 +67,8 @@ app.layout = html.Div(
                             DejaVu Sans Condensed, Liberation Sans, Nimbus Sans L, Tahoma, Geneva, Helvetica Neue, \
                             Helvetica, Arial, sans-serif',
                 color="white",
-                fontWeight=200,
+                fontWeight=100,
+                textAlign="center"
             )
         ),
 
@@ -95,7 +96,7 @@ app.layout = html.Div(
                             className="header-med"
                         ),
 
-                        # DROPDOWN MENU TO SELECT STOCK INDEX#
+                        # DROPDOWN MENU TO SELECT STOCK INDEX
 
                         dcc.Dropdown(
                             id='stock-input',
@@ -287,18 +288,37 @@ app.layout = html.Div(
                State('date-input', 'end_date')])
 def update_ticker_graph(_, symbols, start_date, end_date):
 
-    return dict(
-        data=[
+    data = []
+    invalid_symbols = []
+
+    for symbol in symbols:
+
+        close_price = yf.download(symbol, start=start_date, end=end_date, progress=False)["Close"]
+
+
+        x=close_price.index
+        y=close_price.values
+
+        if (len(x) == 0) or (len(y) == 0):
+            invalid_symbols.append(symbol)
+
+        data.append(
             go.Scatter(
-                x=yf.download(symbol, start=start_date, end=end_date, progress = False)["Close"].index,
-                y=yf.download(symbol, start=start_date, end=end_date, progress= False)["Close"].values,
+                x=x,
+                y=y,
                 mode="lines",
                 name=symbol,
                 line=dict(
                     width=1
                 )
-            ) for symbol in symbols
-        ],
+            )
+        )
+
+    print(invalid_symbols)
+
+    return dict(
+        data=data,
+
         layout=go.Layout(
             title="Closing Prices for: {}".format(', '.join(symbols)),
             xaxis=dict(
