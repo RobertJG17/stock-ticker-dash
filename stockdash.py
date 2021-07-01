@@ -11,8 +11,6 @@ import json
 from pytickersymbols import PyTickerSymbols, Statics
 import yfinance as yf
 
-import datetime
-
 
 # Initialize Application
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
