@@ -3,43 +3,46 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
+
 import plotly.graph_objects as go
 import pandas as pd
+import json
 
 from pytickersymbols import PyTickerSymbols, Statics
 import yfinance as yf
 
+import datetime
+
 
 # Initialize Application
-
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 
-
-# Company Symbols
+# Creating an instance of PyTickerSymbols
 pytick = PyTickerSymbols()
 
-# Using NASDAQ for market
+# Grabbing US NASDAQ index code
 index = Statics.Indices.US_NASDAQ
 
-# Creating DataFrame full of various data related to company
+# Acquiring stock information through method call and formatting result into a DataFrame
 stocks_df = pd.DataFrame.from_records(pytick.get_stocks_by_index(index=index)).set_index("symbol")
+
+# Grabbing the ticker symbols from the DataFrame Index
 tickers = stocks_df.index
 
-# TODO: FIND A WAY TO ADD MORE PRECISE INFO/ATTR ABOUT EACH STOCK
-print(stocks_df.iloc[0])
-
 # Helper Functions
-def create_card(comp, founded, employees):
+def create_card(comp, founded, employees, invalid):
 
     employees = "N/A" if employees == '' else employees
     founded = "N/A" if founded == '' else founded
 
-    return dbc.Card(
+    className = "invalid-card" if invalid else "valid-card"
+
+    card = dbc.Card(
             [
                 dbc.CardBody(
                     [
                         html.H4(comp, className="card-title"),
-                        html.P(f"Est: {founded}", className="card-text"),
+                        html.P(f"Est: {founded}", className="card-text")
                     ],
 
                     style=dict(
@@ -51,11 +54,14 @@ def create_card(comp, founded, employees):
                 dbc.CardFooter(f"Employees: {employees}"),
             ],
 
+            className=className,
             style=dict(
                 width="18rem",
                 margin="5px"
             )
-    )
+        )
+
+    return card
 
 
 # Main application layout
@@ -70,7 +76,7 @@ app.layout = html.Div(
                             DejaVu Sans Condensed, Liberation Sans, Nimbus Sans L, Tahoma, Geneva, Helvetica Neue, \
                             Helvetica, Arial, sans-serif',
                 color="white",
-                fontWeight=400,
+                fontWeight=100,
                 textAlign="center"
             )
         ),
@@ -78,7 +84,7 @@ app.layout = html.Div(
         html.Hr(
             style=dict(
                 backgroundColor="white",
-                marginTop="10px"
+                marginBottom=30
             )
         ),
 
@@ -101,7 +107,7 @@ app.layout = html.Div(
                             className="header-med"
                         ),
 
-                        # DROPDOWN MENU TO SELECT STOCK INDEX#
+                        # DROPDOWN MENU TO SELECT STOCK INDEX
 
                         dcc.Dropdown(
                             id='stock-input',
@@ -125,22 +131,16 @@ app.layout = html.Div(
 
                         )
                     ],
-
-                    style=dict(
-                        # marginRight="10px",
-                        # marginTop="5px",
-                        # flexDirection="row"
-                    )
                 ),
 
                 html.Div([
                     dbc.Button(
                         id="state-button",
                         children="Visualize",
-                        # style=dict(
-                        #     marginLeft="10px",
-                        #     height="48px"
-                        # ),
+                        style=dict(
+                            marginLeft="10px",
+                            height="48px"
+                        ),
                         className="dbc-button"
                     )
                 ],
@@ -280,6 +280,10 @@ app.layout = html.Div(
             style=dict(
                 marginTop="50px"
             )
+        ),
+
+        dcc.Store(
+            id='store-cached'
         )
     ],
     style=dict(
@@ -289,28 +293,52 @@ app.layout = html.Div(
 )
 
 
-@app.callback(Output('graph-output', 'figure'),
+@app.callback(Output('store-cached', 'data'),
               [Input('state-button', 'n_clicks')],
               [State('stock-input', 'value'),
-               State('date-input', 'start_date'),
-               State('date-input', 'end_date')])
-def update_ticker_graph(_, symbols, start_date, end_date):
+               State('date-input', 'start_date')])
+def store_date(_, value, start):
+    return json.dumps({"value": value, "start": start})
 
-    return dict(
-        data=[
+
+@app.callback(Output('graph-output', 'figure'),
+              [Input('store-cached', 'data')],
+              [State('date-input', 'end_date')])
+def update_ticker_graph(cached, end):
+
+    if cached is None:
+        raise dash.exceptions.PreventUpdate
+
+    obj = json.loads(cached)
+    selected_tickers, start = obj['value'], obj['start']
+
+    data = []
+
+    for symbol in selected_tickers:
+
+        info = yf.download(symbol, start=start, end=end, progress=False)["Close"]
+
+        dateRange = info.index
+        closePrice = info.values
+
+        data.append(
             go.Scatter(
-                x=yf.download(symbol, start=start_date, end=end_date, progress=False)["Close"].index,
-                y=yf.download(symbol, start=start_date, end=end_date, progress=False)["Close"].values,
+                x=dateRange,
+                y=closePrice,
                 mode="lines",
                 name=symbol,
 
                 line=dict(
                     width=1
                 )
-            ) for symbol in symbols
-        ],
+            )
+        )
+
+    return dict(
+        data=data,
+
         layout=go.Layout(
-            title="Closing Prices for: {}".format(', '.join(symbols)),
+            title="Closing Prices for: {}".format(', '.join(selected_tickers)),
             xaxis=dict(
                 title="Date",
             ),
@@ -333,21 +361,27 @@ def update_ticker_graph(_, symbols, start_date, end_date):
     )
 
 @app.callback(Output('card-output', 'children'),
-              [Input('state-button', 'n_clicks')],
-              [State('stock-input', 'value')])
-def callback_stats(_, value):
+              [Input('store-cached', 'data')])
+def callback_stats(cached):
+
+    if cached is None:
+        raise dash.exceptions.PreventUpdate
+
+    obj = json.loads(cached)
+    selected_tickers, start = obj['value'], obj['start']
 
     meta = []
 
-    for val in value:
-        founded = stocks_df.loc[val]['metadata']['founded']
-        employees = stocks_df.loc[val]['metadata']['employees']
+    for symbol in selected_tickers:
+        invalid = False
 
+        if len(yf.Ticker(symbol).history(period="1d", start=start)) == 0:
+            invalid = True
 
-        card = create_card(comp=val, founded=founded, employees=employees)
+        card = create_card(comp=symbol, founded=stocks_df.loc[symbol]['metadata']['founded'],
+                        employees=stocks_df.loc[symbol]['metadata']['employees'], invalid=invalid)
 
         meta.append(card)
-
 
 
     return dbc.Row(
@@ -361,20 +395,7 @@ def callback_stats(_, value):
 
 
 if __name__ == '__main__':
-    app.run_server('0.0.0.0', 5001)
+    app.run_server('0.0.0.0', 5001, debug=True)
 
 
-
-# .DayPicker_focusRegion.DayPicker_focusRegion_1 {
-#     background-color:grey;
-# }
-#
-# .CalendarMonth.CalendarMonth_1 {
-#     background-color:grey;
-#     font-color:white;
-# }
-#
-# .CalendarMonthGrid.CalendarMonthGrid_1.CalendarMonthGrid__horizontal.CalendarMonthGrid__horizontal_2 {
-#     background-color:grey;
-# }
 
