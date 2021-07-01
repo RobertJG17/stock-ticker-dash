@@ -44,3 +44,7 @@
 .DateRangePickerInput {
     border: none;
 }
+
+.invalid-card {
+    color: red;
+}
