@@ -2,10 +2,12 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
+import dash_coreui_components as dcu
 from dash.dependencies import Input, Output, State
 
 import plotly.graph_objects as go
 import pandas as pd
+import datetime
 import json
 
 from pytickersymbols import PyTickerSymbols, Statics
@@ -28,19 +30,42 @@ stocks_df = pd.DataFrame.from_records(pytick.get_stocks_by_index(index=index)).s
 tickers = stocks_df.index
 
 # Helper Functions
-def create_card(comp, founded, employees, invalid):
+def create_card(comp, founded, employees, is_valid):
 
     employees = "N/A" if employees == '' else employees
     founded = "N/A" if founded == '' else founded
 
-    className = "invalid-card" if invalid else "valid-card"
+    className = "valid-card" if is_valid else "invalid-card"
+    error_text = f"""
+        Error coagulating stock data for desired time interval.
+    """
 
     card = dbc.Card(
             [
                 dbc.CardBody(
                     [
-                        html.H4(comp, className="card-title"),
-                        html.P(f"Est: {founded}", className="card-text")
+                        html.Div(
+                            [
+                                html.Div(
+                                    [
+                                        html.H4(comp, className="card-title"),
+
+                                        html.P(f"Est: {founded}", className="card-text")
+                                    ],
+
+                                    className="title-date"
+                                ),
+
+                                html.P(
+                                    error_text,
+                                    className="error-text",
+                                    hidden=is_valid
+                                )
+
+                            ],
+
+                            className="upper-card-container"
+                        )
                     ],
 
                     style=dict(
@@ -281,7 +306,7 @@ app.layout = html.Div(
         ),
 
         dcc.Store(
-            id='store-cached'
+            id='data-store'
         )
     ],
     style=dict(
@@ -291,33 +316,33 @@ app.layout = html.Div(
 )
 
 
-@app.callback(Output('store-cached', 'data'),
+@app.callback(Output('data-store', 'data'),
               [Input('state-button', 'n_clicks')],
               [State('stock-input', 'value'),
-               State('date-input', 'start_date')])
-def store_date(_, value, start):
-    return json.dumps({"value": value, "start": start})
+               State('date-input', 'start_date'),
+               State('date-input', 'end_date')])
+def store_date(_, value, start, end):
+    return json.dumps({"value": value, "start": start, "end": end})
 
 
 @app.callback(Output('graph-output', 'figure'),
-              [Input('store-cached', 'data')],
-              [State('date-input', 'end_date')])
-def update_ticker_graph(cached, end):
+              [Input('data-store', 'data')])
+def update_ticker_graph(cached):
 
     if cached is None:
         raise dash.exceptions.PreventUpdate
 
     obj = json.loads(cached)
-    selected_tickers, start = obj['value'], obj['start']
-
+    selected_tickers, start, end = obj['value'], obj['start'], obj['end']
     data = []
 
     for symbol in selected_tickers:
 
-        info = yf.download(symbol, start=start, end=end, progress=False)["Close"]
 
-        dateRange = info.index
-        closePrice = info.values
+        info = yf.Ticker(symbol).history(start=start, end=end)["Close"]
+
+        dateRange = info.index if len(info) != 0 else None
+        closePrice = info.values if len(info) != 0 else None
 
         data.append(
             go.Scatter(
@@ -359,7 +384,7 @@ def update_ticker_graph(cached, end):
     )
 
 @app.callback(Output('card-output', 'children'),
-              [Input('store-cached', 'data')])
+              [Input('data-store', 'data')])
 def callback_stats(cached):
 
     if cached is None:
@@ -371,13 +396,15 @@ def callback_stats(cached):
     meta = []
 
     for symbol in selected_tickers:
-        invalid = False
+        is_valid = True
 
-        if len(yf.Ticker(symbol).history(period="1d", start=start)) == 0:
-            invalid = True
+        history = yf.Ticker(symbol).history(start=start, end=datetime.date.fromisoformat(start) + datetime.timedelta(days=1))
+
+        if len(history) == 0:
+            is_valid = False
 
         card = create_card(comp=symbol, founded=stocks_df.loc[symbol]['metadata']['founded'],
-                        employees=stocks_df.loc[symbol]['metadata']['employees'], invalid=invalid)
+                        employees=stocks_df.loc[symbol]['metadata']['employees'], is_valid=is_valid)
 
         meta.append(card)
 

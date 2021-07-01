@@ -54,3 +54,17 @@
 .invalid-card {
     color: red;
 }
+
+.upper-card-container {
+    vertical-align:left
+}
+
+.title-date {
+    display:flex;
+    flex-direction:column
+}
+
+.error-text {
+    margin-left:20px;
+    flex-wrap:wrap;
+}
