@@ -8,15 +8,14 @@ import plotly.graph_objects as go
 import pandas as pd
 import json
 
-import yfinance as yf
 from pytickersymbols import PyTickerSymbols, Statics
+import yfinance as yf
 
 import datetime
 
 
 # Initialize Application
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
-
 
 # Creating an instance of PyTickerSymbols
 pytick = PyTickerSymbols()
@@ -34,6 +33,7 @@ tickers = stocks_df.index
 def create_card(comp, founded, employees, invalid):
 
     employees = "N/A" if employees == '' else employees
+    founded = "N/A" if founded == '' else founded
 
     className = "invalid-card" if invalid else "valid-card"
 
@@ -102,6 +102,7 @@ app.layout = html.Div(
                             DejaVu Sans Condensed, Liberation Sans, Nimbus Sans L, Tahoma, Geneva, Helvetica Neue, \
                             Helvetica, Arial, sans-serif",
                                 fontWeight=100,
+                                textAlign="center"
                             ),
                             className="header-med"
                         ),
@@ -130,22 +131,17 @@ app.layout = html.Div(
 
                         )
                     ],
-
-                    style=dict(
-                        # marginRight="10px",
-                        # marginTop="5px",
-                        # flexDirection="row"
-                    )
                 ),
 
                 html.Div([
                     dbc.Button(
                         id="state-button",
-                        children="Submit",
+                        children="Visualize",
                         style=dict(
                             marginLeft="10px",
                             height="48px"
-                        )
+                        ),
+                        className="dbc-button"
                     )
                 ],
                 style=dict(
@@ -166,7 +162,8 @@ app.layout = html.Div(
                             DejaVu Sans Condensed, Liberation Sans, Nimbus Sans L, Tahoma, Geneva, Helvetica Neue, \
                             Helvetica, Arial, sans-serif',
                                 fontWeight=100,
-                                width=500
+                                width=500,
+                                textAlign="center"
                             ),
                             className="header-med"
                         ),
@@ -215,8 +212,8 @@ app.layout = html.Div(
                     figure=dict(
                         data=[
                             go.Scatter(
-                                x=yf.download(symbol, start="2016-01-04", end="2017-12-29")["Close"].index,
-                                y=yf.download(symbol, start="2016-01-04", end="2017-12-29")["Close"].values,
+                                x=yf.download(symbol, start="2016-01-04", end="2017-12-29", progress=False)["Close"].index,
+                                y=yf.download(symbol, start="2016-01-04", end="2017-12-29", progress=False)["Close"].values,
                                 mode="lines",
                                 name=symbol,
                                 line=dict(
@@ -255,7 +252,7 @@ app.layout = html.Div(
 
         html.Hr(
             style=dict(
-                marginTop="40px",
+                marginTop="50px",
                 backgroundColor="white"
             )
         ),
@@ -268,7 +265,8 @@ app.layout = html.Div(
                     style=dict(
                         fontFamily='Frutiger, Frutiger Linotype, Univers, Calibri, Gill Sans, Gill Sans MT, Myriad Pro, Myriad,\
                             DejaVu Sans Condensed, Liberation Sans, Nimbus Sans L, Tahoma, Geneva, Helvetica Neue, \
-                            Helvetica, Arial, sans-serif'
+                            Helvetica, Arial, sans-serif',
+                        fontWeight=100
                     )
                 ),
 
@@ -329,6 +327,7 @@ def update_ticker_graph(cached, end):
                 y=closePrice,
                 mode="lines",
                 name=symbol,
+
                 line=dict(
                     width=1
                 )
