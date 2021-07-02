@@ -321,28 +321,48 @@ app.layout = html.Div(
               [State('stock-input', 'value'),
                State('date-input', 'start_date'),
                State('date-input', 'end_date')])
-def store_date(_, value, start, end):
-    return json.dumps({"value": value, "start": start, "end": end})
+def data_store(_, value, start, end):
+    cache = {}
+
+    data = []
+    invalid = []
+
+    for symbol in value:
+        info = yf.Ticker(symbol).history(start=start, end=end)["Close"]
+
+        info_date = info.index.astype(str)
+        info_close = info.values
+
+        if len(info) == 0:
+            invalid.append(symbol)
+
+        temp = [{date: str(info[date])} for date in info_date]
+        data.append({symbol: temp})
+
+    cache["data"] = data
+    cache["invalid"] = invalid
+
+    return json.dumps(cache)
 
 
 @app.callback(Output('graph-output', 'figure'),
               [Input('data-store', 'data')])
-def update_ticker_graph(cached):
+def update_ticker_graph(state_data):
 
-    if cached is None:
+    if state_data is None:
         raise dash.exceptions.PreventUpdate
 
-    obj = json.loads(cached)
-    selected_tickers, start, end = obj['value'], obj['start'], obj['end']
+    obj = json.loads(state_data)
+
+    selected_tickers = [list(item.keys())[0] for item in obj['data']]
     data = []
 
-    for symbol in selected_tickers:
+    for info in obj["data"]:
+        date_closed = list(info.values())[0]
 
-
-        info = yf.Ticker(symbol).history(start=start, end=end)["Close"]
-
-        dateRange = info.index if len(info) != 0 else None
-        closePrice = info.values if len(info) != 0 else None
+        symbol = list(info.keys())[0]
+        dateRange =[list(d.keys())[0] for d in date_closed]
+        closePrice = [list(d.values())[0] for d in date_closed]
 
         data.append(
             go.Scatter(
@@ -385,22 +405,20 @@ def update_ticker_graph(cached):
 
 @app.callback(Output('card-output', 'children'),
               [Input('data-store', 'data')])
-def callback_stats(cached):
+def callback_stats(state_data):
 
-    if cached is None:
+    if state_data is None:
         raise dash.exceptions.PreventUpdate
 
-    obj = json.loads(cached)
-    selected_tickers, start = obj['value'], obj['start']
+    obj = json.loads(state_data)
+    selected_tickers = [list(item.keys())[0] for item in obj['data']]
 
     meta = []
 
     for symbol in selected_tickers:
         is_valid = True
 
-        history = yf.Ticker(symbol).history(start=start, end=datetime.date.fromisoformat(start) + datetime.timedelta(days=1))
-
-        if len(history) == 0:
+        if symbol in obj["invalid"]:
             is_valid = False
 
         card = create_card(comp=symbol, founded=stocks_df.loc[symbol]['metadata']['founded'],
