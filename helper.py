@@ -32,7 +32,11 @@ def create_card(comp, founded, employees, is_valid):
                                 html.P(
                                     error_text,
                                     className="error-text",
-                                    hidden=is_valid
+                                    hidden=is_valid,
+                                    style=dict(
+                                        marginLeft="60px",
+                                        fontWeight=100
+                                    )
                                 )
 
                             ],
@@ -85,3 +89,5 @@ def create_graph(data, selected_tickers):
                     )
                 )
             )
+
+

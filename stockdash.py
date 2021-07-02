@@ -86,15 +86,6 @@ app.layout = html.Div(
 
                             value=['TSLA', 'AAPL'],
                             multi=True,
-                            style=dict(
-                                width="500px",
-                                fontSize=24,
-                                height="auto",
-                                display="inline-block",
-                                backgroundColor="black",
-                                textAlign="center"
-                            )
-
                         )
                     ],
                 ),

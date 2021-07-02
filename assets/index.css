@@ -8,9 +8,11 @@
 }
 
 .Select-control {
-    border-radius:1px;
-    border-color:white;
     border: none;
+    width:500px;
+    height:75px;
+    display: inline-block;
+    background-color: black !important;
 }
 
 .Select-placeholder {
@@ -53,10 +55,12 @@
 
 .invalid-card {
     color: red;
+    box-shadow: 0px 0px 0px 1px #ff0000;
+    animation: animate 2s ease-out infinite;
 }
 
 .upper-card-container {
-    vertical-align:left
+    display:flex;
 }
 
 .title-date {
@@ -67,5 +71,22 @@
 .error-text {
     margin-left:20px;
     flex-wrap:wrap;
+
 }
+
+@keyframes animate {
+  0% {
+      box-shadow: 0px 0px 0px 1px #ff0000
+  }
+
+  50% {
+      box-shadow: 0px 0px 0px 3px #ff0000
+  }
+
+  100% {
+      box-shadow: 0px 0px 0px 1px #ff0000
+ }
+
+}
+
 
