@@ -11,7 +11,7 @@ import json
 from pytickersymbols import PyTickerSymbols, Statics
 import yfinance as yf
 
-from flask_caching import Cache
+from helper import create_graph, create_card
 
 
 # Initialize Application
@@ -28,63 +28,6 @@ stocks_df = pd.DataFrame.from_records(pytick.get_stocks_by_index(index=index)).s
 
 # Grabbing the ticker symbols from the DataFrame Index
 tickers = stocks_df.index
-
-# Helper Functions
-def create_card(comp, founded, employees, is_valid):
-
-    employees = "N/A" if employees == '' else employees
-    founded = "N/A" if founded == '' else founded
-
-    className = "valid-card" if is_valid else "invalid-card"
-    error_text = f"""
-        Error coagulating stock data for desired time interval.
-    """
-
-    card = dbc.Card(
-            [
-                dbc.CardBody(
-                    [
-                        html.Div(
-                            [
-                                html.Div(
-                                    [
-                                        html.H4(comp, className="card-title"),
-
-                                        html.P(f"Est: {founded}", className="card-text")
-                                    ],
-
-                                    className="title-date"
-                                ),
-
-                                html.P(
-                                    error_text,
-                                    className="error-text",
-                                    hidden=is_valid
-                                )
-
-                            ],
-
-                            className="upper-card-container"
-                        )
-                    ],
-
-                    style=dict(
-                        fontFamily="Frutiger, Frutiger Linotype, Univers, Calibri, Gill Sans, Gill Sans MT, Myriad Pro, Myriad,\
-                            DejaVu Sans Condensed, Liberation Sans, Nimbus Sans L, Tahoma, Geneva, Helvetica Neue, \
-                            Helvetica, Arial, sans-serif"
-                    )
-                ),
-                dbc.CardFooter(f"Employees: {employees}"),
-            ],
-
-            className=className,
-            style=dict(
-                width="18rem",
-                margin="5px"
-            )
-        )
-
-    return card
 
 
 # Main application layout
@@ -221,9 +164,6 @@ app.layout = html.Div(
             style=dict(
                 display="flex",
                 justifyContent="space-evenly"
-                # verticalAlign="middle",
-                # alignItems="center",
-                # alignText="center"
             )
         ),
 
@@ -242,7 +182,7 @@ app.layout = html.Div(
                     children=[
                         dcc.Graph(
                             id='graph-output',
-                            figure=dict(
+                            figure=create_graph(
                                 data=[
                                     go.Scatter(
                                         x=yf.download(symbol, start="2016-01-04", end="2017-12-29", progress=False)["Close"].index,
@@ -255,30 +195,8 @@ app.layout = html.Div(
                                     ) for symbol in ["TSLA", "AAPL"]
                                 ],
 
-                                layout=go.Layout(
-                                    title=dict(
-                                        text="Closing Prices for: {}".format(', '.join(["TSLA", "AAPL"]))
-                                    ),
-                                    xaxis=dict(
-                                        title="Date"
-                                    ),
-
-                                    yaxis=dict(
-                                        title="Closing Price",
-                                    ),
-
-                                    plot_bgcolor="black",
-                                    paper_bgcolor="black",
-
-                                    font=dict(
-                                        color="white",
-                                        family="Frutiger, Frutiger Linotype, Univers, Calibri, Gill Sans, Gill Sans MT, Myriad Pro, Myriad,\
-                                    DejaVu Sans Condensed, Liberation Sans, Nimbus Sans L, Tahoma, Geneva, Helvetica Neue, \
-                                    Helvetica, Arial, sans-serif",
-                                        size=16,
-                                    )
-                                )
-                            )
+                                selected_tickers=["TSLA", "AAPL"]
+                            ),
                         )
                     ]
                 )
@@ -322,10 +240,6 @@ app.layout = html.Div(
                                 justifyContent="center"
                             )
                         )
-                        # create_card(comp=symbol, founded=stocks_df.loc[symbol]['metadata']['founded'],
-                        # employees=stocks_df.loc[symbol]['metadata']['employees'], is_valid=True)
-                        #
-                        # for symbol in ['TSLA', 'AAPL']
                     ],
 
 
@@ -419,33 +333,12 @@ def update_ticker_graph(state_data):
             )
         )
 
+    figure = create_graph(data, selected_tickers)
+
     return dcc.Graph(
-        figure=dict(
-            data=data,
-
-            layout=go.Layout(
-                title="Closing Prices for: {}".format(', '.join(selected_tickers)),
-                xaxis=dict(
-                    title="Date",
-                ),
-
-                yaxis=dict(
-                    title="Closing Price",
-                ),
-
-                plot_bgcolor="black",
-                paper_bgcolor="black",
-
-                font=dict(
-                    color="white",
-                    family="Frutiger, Frutiger Linotype, Univers, Calibri, Gill Sans, Gill Sans MT, Myriad Pro, Myriad,\
-                                DejaVu Sans Condensed, Liberation Sans, Nimbus Sans L, Tahoma, Geneva, Helvetica Neue, \
-                                Helvetica, Arial, sans-serif",
-                    size=14
-                )
-            )
-        )
+        figure=figure
     )
+
 
 @app.callback(Output('card-output', 'children'),
               [Input('data-store', 'data')])
