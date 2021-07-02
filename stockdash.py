@@ -2,16 +2,16 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
-import dash_coreui_components as dcu
 from dash.dependencies import Input, Output, State
 
 import plotly.graph_objects as go
 import pandas as pd
-import datetime
 import json
 
 from pytickersymbols import PyTickerSymbols, Statics
 import yfinance as yf
+
+from flask_caching import Cache
 
 
 # Initialize Application
@@ -156,22 +156,28 @@ app.layout = html.Div(
                     ],
                 ),
 
-                html.Div([
-                    dbc.Button(
-                        id="state-button",
-                        children="Visualize",
-                        style=dict(
-                            marginLeft="10px",
-                            height="48px"
-                        ),
-                        className="dbc-button"
-                    )
-                ],
-                style=dict(
-                    display="flex",
-                    alignItems = "center"
+                html.Div(
+                    [
+                        dcc.Loading(
+                            [
+                                dbc.Button(
+                                    id="state-button",
+                                    children="Visualize",
+                                    style=dict(
+                                        marginLeft="10px",
+                                        height="48px"
+                                    ),
+                                    className="dbc-button"
+                                )
+                            ],
 
-                )
+                            id="loading-button"
+                        )
+                    ],
+
+                    style=dict(
+                        alignItems="center"
+                    )
                 ),
 
                 html.Div(
@@ -230,45 +236,51 @@ app.layout = html.Div(
         html.Div(
             [
                 # DCC GRAPH THAT OUTPUTS STATE CHANGES TO EITHER PICKER
-                dcc.Graph(
-                    id='graph-output',
-                    figure=dict(
-                        data=[
-                            go.Scatter(
-                                x=yf.download(symbol, start="2016-01-04", end="2017-12-29", progress=False)["Close"].index,
-                                y=yf.download(symbol, start="2016-01-04", end="2017-12-29", progress=False)["Close"].values,
-                                mode="lines",
-                                name=symbol,
-                                line=dict(
-                                    width=1
+
+                html.Div(
+                    id="graph-div",
+                    children=[
+                        dcc.Graph(
+                            id='graph-output',
+                            figure=dict(
+                                data=[
+                                    go.Scatter(
+                                        x=yf.download(symbol, start="2016-01-04", end="2017-12-29", progress=False)["Close"].index,
+                                        y=yf.download(symbol, start="2016-01-04", end="2017-12-29", progress=False)["Close"].values,
+                                        mode="lines",
+                                        name=symbol,
+                                        line=dict(
+                                            width=1
+                                        )
+                                    ) for symbol in ["TSLA", "AAPL"]
+                                ],
+
+                                layout=go.Layout(
+                                    title=dict(
+                                        text="Closing Prices for: {}".format(', '.join(["TSLA", "AAPL"]))
+                                    ),
+                                    xaxis=dict(
+                                        title="Date"
+                                    ),
+
+                                    yaxis=dict(
+                                        title="Closing Price",
+                                    ),
+
+                                    plot_bgcolor="black",
+                                    paper_bgcolor="black",
+
+                                    font=dict(
+                                        color="white",
+                                        family="Frutiger, Frutiger Linotype, Univers, Calibri, Gill Sans, Gill Sans MT, Myriad Pro, Myriad,\
+                                    DejaVu Sans Condensed, Liberation Sans, Nimbus Sans L, Tahoma, Geneva, Helvetica Neue, \
+                                    Helvetica, Arial, sans-serif",
+                                        size=16,
+                                    )
                                 )
-                            ) for symbol in ["TSLA", "AAPL"]
-                        ],
-
-                        layout=go.Layout(
-                            title=dict(
-                                text="Closing Prices for: {}".format(', '.join(["TSLA", "AAPL"]))
-                            ),
-                            xaxis=dict(
-                                title="Date"
-                            ),
-
-                            yaxis=dict(
-                                title="Closing Price",
-                            ),
-
-                            plot_bgcolor="black",
-                            paper_bgcolor="black",
-
-                            font=dict(
-                                color="white",
-                                family="Frutiger, Frutiger Linotype, Univers, Calibri, Gill Sans, Gill Sans MT, Myriad Pro, Myriad,\
-                            DejaVu Sans Condensed, Liberation Sans, Nimbus Sans L, Tahoma, Geneva, Helvetica Neue, \
-                            Helvetica, Arial, sans-serif",
-                                size=16,
                             )
                         )
-                    )
+                    ]
                 )
             ]
         ),
@@ -296,6 +308,27 @@ app.layout = html.Div(
                 html.Hr(),
 
                 html.Div(
+                    [
+                        dbc.Row(
+                            [
+                                create_card(comp=symbol, founded=stocks_df.loc[symbol]['metadata']['founded'],
+                                employees=stocks_df.loc[symbol]['metadata']['employees'], is_valid=True)
+
+                                for symbol in ['TSLA', 'AAPL']
+                            ],
+
+                            style=dict(
+                                display="flex",
+                                justifyContent="center"
+                            )
+                        )
+                        # create_card(comp=symbol, founded=stocks_df.loc[symbol]['metadata']['founded'],
+                        # employees=stocks_df.loc[symbol]['metadata']['employees'], is_valid=True)
+                        #
+                        # for symbol in ['TSLA', 'AAPL']
+                    ],
+
+
                     id="card-output"
                 )
             ],
@@ -305,9 +338,17 @@ app.layout = html.Div(
             )
         ),
 
-        dcc.Store(
-            id='data-store'
+        html.Div(
+            [
+                dcc.Store(
+                    id='data-store',
+                    storage_type="local"
+                )
+            ],
+
+            id='data-div'
         )
+
     ],
     style=dict(
         padding="40px",
@@ -316,22 +357,22 @@ app.layout = html.Div(
 )
 
 
-@app.callback(Output('data-store', 'data'),
+@app.callback([Output('data-store', 'data'),
+               Output('loading-button', 'loading_state')],
               [Input('state-button', 'n_clicks')],
               [State('stock-input', 'value'),
                State('date-input', 'start_date'),
                State('date-input', 'end_date')])
 def data_store(_, value, start, end):
-    cache = {}
+
+    state_data = {}
 
     data = []
     invalid = []
 
     for symbol in value:
         info = yf.Ticker(symbol).history(start=start, end=end)["Close"]
-
         info_date = info.index.astype(str)
-        info_close = info.values
 
         if len(info) == 0:
             invalid.append(symbol)
@@ -339,13 +380,13 @@ def data_store(_, value, start, end):
         temp = [{date: str(info[date])} for date in info_date]
         data.append({symbol: temp})
 
-    cache["data"] = data
-    cache["invalid"] = invalid
+    state_data["data"] = data
+    state_data["invalid"] = invalid
 
-    return json.dumps(cache)
+    return json.dumps(state_data), {"is_loading": False}
 
 
-@app.callback(Output('graph-output', 'figure'),
+@app.callback(Output('graph-div', 'children'),
               [Input('data-store', 'data')])
 def update_ticker_graph(state_data):
 
@@ -355,6 +396,7 @@ def update_ticker_graph(state_data):
     obj = json.loads(state_data)
 
     selected_tickers = [list(item.keys())[0] for item in obj['data']]
+
     data = []
 
     for info in obj["data"]:
@@ -377,28 +419,30 @@ def update_ticker_graph(state_data):
             )
         )
 
-    return dict(
-        data=data,
+    return dcc.Graph(
+        figure=dict(
+            data=data,
 
-        layout=go.Layout(
-            title="Closing Prices for: {}".format(', '.join(selected_tickers)),
-            xaxis=dict(
-                title="Date",
-            ),
+            layout=go.Layout(
+                title="Closing Prices for: {}".format(', '.join(selected_tickers)),
+                xaxis=dict(
+                    title="Date",
+                ),
 
-            yaxis=dict(
-                title="Closing Price",
-            ),
+                yaxis=dict(
+                    title="Closing Price",
+                ),
 
-            plot_bgcolor="black",
-            paper_bgcolor="black",
+                plot_bgcolor="black",
+                paper_bgcolor="black",
 
-            font=dict(
-                color="white",
-                family="Frutiger, Frutiger Linotype, Univers, Calibri, Gill Sans, Gill Sans MT, Myriad Pro, Myriad,\
-                            DejaVu Sans Condensed, Liberation Sans, Nimbus Sans L, Tahoma, Geneva, Helvetica Neue, \
-                            Helvetica, Arial, sans-serif",
-                size=14
+                font=dict(
+                    color="white",
+                    family="Frutiger, Frutiger Linotype, Univers, Calibri, Gill Sans, Gill Sans MT, Myriad Pro, Myriad,\
+                                DejaVu Sans Condensed, Liberation Sans, Nimbus Sans L, Tahoma, Geneva, Helvetica Neue, \
+                                Helvetica, Arial, sans-serif",
+                    size=14
+                )
             )
         )
     )
