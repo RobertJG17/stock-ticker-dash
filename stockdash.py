@@ -245,18 +245,13 @@ app.layout = html.Div(
             )
         ),
 
-        html.Div(
-            [
-                dcc.Store(
-                    id='data-store',
-                    storage_type="local"
-                )
-            ],
 
-            id='data-div'
+        dcc.Store(
+            id='data-store',
+            storage_type="local"
         )
-
     ],
+
     style=dict(
         padding="40px",
         backgroundColor="black"
