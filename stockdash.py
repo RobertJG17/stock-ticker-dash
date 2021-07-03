@@ -17,6 +17,8 @@ from helper import create_graph, create_card
 # Initialize Application
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 
+server = app.server
+
 # Creating an instance of PyTickerSymbols
 pytick = PyTickerSymbols()
 
