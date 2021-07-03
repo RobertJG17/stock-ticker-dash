@@ -36,7 +36,7 @@ tickers = stocks_df.index
 app.layout = html.Div(
     [
         html.H1(
-            "Stock Ticker Dashboard",
+            "NASDAQ 100",
 
             style=dict(
                 fontSize=80,
@@ -368,7 +368,7 @@ def callback_stats(state_data):
 
 
 if __name__ == '__main__':
-    app.run_server()
+    app.run_server('0.0.0.0', 5000)
 
 
 
