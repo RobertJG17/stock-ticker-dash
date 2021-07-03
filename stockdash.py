@@ -366,7 +366,7 @@ def callback_stats(state_data):
 
 
 if __name__ == '__main__':
-    app.run_server('0.0.0.0', 5001, debug=True)
+    app.run_server()
 
 
 
