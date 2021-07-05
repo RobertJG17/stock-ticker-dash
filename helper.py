@@ -65,29 +65,29 @@ def create_card(comp, founded, employees, is_valid):
 
 def create_graph(data, selected_tickers):
       return dict(
-                data=data,
+          data=data,
 
-                layout=go.Layout(
-                    title="Closing Prices for: {}".format(', '.join(selected_tickers)),
-                    xaxis=dict(
-                        title="Date",
-                    ),
+          layout=go.Layout(
+                title="Closing Prices for: {}".format(', '.join(selected_tickers)),
+                xaxis=dict(
+                    title="Date",
+                ),
 
-                    yaxis=dict(
-                        title="Closing Price",
-                    ),
+                yaxis=dict(
+                    title="Closing Price",
+                ),
 
-                    plot_bgcolor="black",
-                    paper_bgcolor="black",
+                plot_bgcolor="black",
+                paper_bgcolor="black",
 
-                    font=dict(
-                        color="white",
-                        family="Frutiger, Frutiger Linotype, Univers, Calibri, Gill Sans, Gill Sans MT, Myriad Pro, Myriad,\
-                                    DejaVu Sans Condensed, Liberation Sans, Nimbus Sans L, Tahoma, Geneva, Helvetica Neue, \
-                                    Helvetica, Arial, sans-serif",
-                        size=14
-                    )
+                font=dict(
+                    color="white",
+                    family="Frutiger, Frutiger Linotype, Univers, Calibri, Gill Sans, Gill Sans MT, Myriad Pro, Myriad,\
+                    DejaVu Sans Condensed, Liberation Sans, Nimbus Sans L, Tahoma, Geneva, Helvetica Neue, \
+                    Helvetica, Arial, sans-serif",
+                    size=14
                 )
-            )
+          )
+      )
 
 
