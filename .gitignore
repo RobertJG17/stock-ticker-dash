@@ -2,4 +2,3 @@ env
 .env
 ./env
 .idea
-venv/

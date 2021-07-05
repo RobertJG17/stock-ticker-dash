@@ -14,7 +14,9 @@ import yfinance as yf
 from helper import create_graph, create_card
 
 
-# Initialize Application
+
+# SECTION: Initialize Application, DataFrame, and Tickers
+
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 
 server = app.server
@@ -32,7 +34,9 @@ stocks_df = pd.DataFrame.from_records(pytick.get_stocks_by_index(index=index)).s
 tickers = stocks_df.index
 
 
-# Main application layout
+
+# SECTION: Main application layout
+
 app.layout = html.Div(
     [
         html.H1(
@@ -56,7 +60,7 @@ app.layout = html.Div(
             )
         ),
 
-        # LEVEL 1 Div holding inner divs for both of our DCC and H3 components
+        # DIV HOLDING INNER DIVS FOR BOTH OF OUR DCC AND H3 COMPONENTS.
         html.Div(
             [
                 html.Div(
@@ -248,7 +252,7 @@ app.layout = html.Div(
 
         dcc.Store(
             id='data-store',
-            storage_type="local"
+            storage_type="session"
         )
     ],
 
@@ -258,6 +262,9 @@ app.layout = html.Div(
     )
 )
 
+
+
+# SECTION: Callbacks
 
 @app.callback([Output('data-store', 'data'),
                Output('loading-button', 'loading_state')],
@@ -361,6 +368,9 @@ def callback_stats(state_data):
         )
     )
 
+
+
+# SECTION: Server
 
 if __name__ == '__main__':
     app.run_server()
