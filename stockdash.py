@@ -29,7 +29,10 @@ pytick = PyTickerSymbols()
 index = Statics.Indices.US_NASDAQ
 
 # Acquiring stock information through method call and formatting result into a DataFrame
-stocks_df = pd.DataFrame.from_records(pytick.get_stocks_by_index(index=index)).set_index("symbol")
+stocks_df = pd.DataFrame.from_records(pytick.get_stocks_by_index(index=index))
+stocks_df["name"] = stocks_df["name"].apply(lambda x: x.title())
+stocks_df = stocks_df.sort_values(by="name")
+stocks_df = stocks_df.set_index("symbol")
 
 # Grabbing the ticker symbols from the DataFrame Index
 tickers = stocks_df.index
@@ -88,14 +91,15 @@ app.layout = html.Div(
                         ),
 
                         # DROPDOWN MENU TO SELECT STOCK INDEX
-
                         dcc.Dropdown(
                             id='stock-input',
                             options=[
                                 dict(
                                     label=stocks_df.loc[symbol]["name"],
                                     value=symbol
-                                ) for symbol in tickers
+                                )
+
+                                for symbol in tickers
                             ],
 
                             value=['TSLA', 'AAPL'],
@@ -384,4 +388,5 @@ if __name__ == '__main__':
     app.run_server()
 
 
+# '0.0.0.0', 5000, debug=True
 
