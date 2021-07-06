@@ -12,6 +12,7 @@ import json
 from pytickersymbols import PyTickerSymbols, Statics
 import yfinance as yf
 
+
 from helper import create_graph, create_card
 
 
