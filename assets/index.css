@@ -56,8 +56,12 @@
 
 .invalid-card {
     color: red;
-    box-shadow: 0px 0px 0px 1px #ff0000;
     animation: animate 2s ease-out infinite;
+    border: 2px solid;
+    border-image-slice: 1;
+    border-image-source: linear-gradient(var(--angle), orange, red);
+    animation: 4s rotate linear infinite;
+    --angle: 0deg;
 }
 
 .upper-card-container {
@@ -75,19 +79,16 @@
 
 }
 
-@keyframes animate {
-  0% {
-      box-shadow: 0px 0px 0px 1px #ff0000
+@keyframes rotate {
+  to {
+    --angle: 360deg;
   }
+}
 
-  50% {
-      box-shadow: 0px 0px 0px 3px #ff0000
-  }
-
-  100% {
-      box-shadow: 0px 0px 0px 1px #ff0000
- }
-
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
 }
 
 

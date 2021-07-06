@@ -1,5 +1,4 @@
 import dash
-# import dash_auth
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
@@ -11,7 +10,6 @@ import json
 
 from pytickersymbols import PyTickerSymbols, Statics
 import yfinance as yf
-
 
 from helper import create_graph, create_card
 
@@ -37,13 +35,6 @@ stocks_df = stocks_df.set_index("symbol")
 
 # Grabbing the ticker symbols from the DataFrame Index
 tickers = stocks_df.index
-
-
-
-# SECTION: Adding basic HTTP auth to dashboard
-
-# USERNAME_PASSWORD_PAIRS = [['username', 'password'], ['Jamesbond', '007']]
-# auth = dash_auth.BasicAuth(app, USERNAME_PASSWORD_PAIRS)
 
 
 
@@ -383,11 +374,10 @@ def callback_stats(state_data):
 
 
 
-# SECTION: Run Server
+# SECTION: Run Server | localhost spec - '0.0.0.0', 5000, debug=True
 
 if __name__ == '__main__':
     app.run_server()
 
 
-# '0.0.0.0', 5000, debug=True
 

@@ -4,3 +4,4 @@ env
 .idea
 *.pyc
 .DS_Store
+\miscellaneous
