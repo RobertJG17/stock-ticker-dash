@@ -1,4 +1,5 @@
 import dash
+# import dash_auth
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
@@ -14,7 +15,9 @@ import yfinance as yf
 from helper import create_graph, create_card
 
 
-# Initialize Application
+
+# SECTION: Initialize Application, DataFrame, and Tickers
+
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 
 server = app.server
@@ -26,13 +29,25 @@ pytick = PyTickerSymbols()
 index = Statics.Indices.US_NASDAQ
 
 # Acquiring stock information through method call and formatting result into a DataFrame
-stocks_df = pd.DataFrame.from_records(pytick.get_stocks_by_index(index=index)).set_index("symbol")
+stocks_df = pd.DataFrame.from_records(pytick.get_stocks_by_index(index=index))
+stocks_df["name"] = stocks_df["name"].apply(lambda x: x.title())
+stocks_df = stocks_df.sort_values(by="name")
+stocks_df = stocks_df.set_index("symbol")
 
 # Grabbing the ticker symbols from the DataFrame Index
 tickers = stocks_df.index
 
 
-# Main application layout
+
+# SECTION: Adding basic HTTP auth to dashboard
+
+# USERNAME_PASSWORD_PAIRS = [['username', 'password'], ['Jamesbond', '007']]
+# auth = dash_auth.BasicAuth(app, USERNAME_PASSWORD_PAIRS)
+
+
+
+# SECTION: Main application layout
+
 app.layout = html.Div(
     [
         html.H1(
@@ -56,7 +71,7 @@ app.layout = html.Div(
             )
         ),
 
-        # LEVEL 1 Div holding inner divs for both of our DCC and H3 components
+        # DIV HOLDING INNER DIVS FOR BOTH OF OUR DCC AND H3 COMPONENTS.
         html.Div(
             [
                 html.Div(
@@ -76,14 +91,15 @@ app.layout = html.Div(
                         ),
 
                         # DROPDOWN MENU TO SELECT STOCK INDEX
-
                         dcc.Dropdown(
                             id='stock-input',
                             options=[
                                 dict(
                                     label=stocks_df.loc[symbol]["name"],
                                     value=symbol
-                                ) for symbol in tickers
+                                )
+
+                                for symbol in tickers
                             ],
 
                             value=['TSLA', 'AAPL'],
@@ -248,7 +264,7 @@ app.layout = html.Div(
 
         dcc.Store(
             id='data-store',
-            storage_type="local"
+            storage_type="session"
         )
     ],
 
@@ -258,6 +274,9 @@ app.layout = html.Div(
     )
 )
 
+
+
+# SECTION: Callbacks
 
 @app.callback([Output('data-store', 'data'),
                Output('loading-button', 'loading_state')],
@@ -362,8 +381,12 @@ def callback_stats(state_data):
     )
 
 
+
+# SECTION: Run Server
+
 if __name__ == '__main__':
     app.run_server()
 
 
+# '0.0.0.0', 5000, debug=True
 

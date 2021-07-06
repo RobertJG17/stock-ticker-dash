@@ -4,7 +4,7 @@
 
 .Select {
     color:black;
-    font-size:15px;
+    font-size:14px !important;
 }
 
 .Select-control {
