@@ -97,7 +97,7 @@ app.layout = html.Div(
                             value=['TSLA', 'AAPL'],
                             multi=True,
                         )
-                    ],
+                    ]
                 ),
 
                 html.Div(
@@ -138,6 +138,7 @@ app.layout = html.Div(
                                 width=500,
                                 textAlign="center"
                             ),
+
                             className="header-med"
                         ),
 
@@ -149,7 +150,7 @@ app.layout = html.Div(
                                     start_date='2016-01-04',
                                     end_date='2017-12-29',
                                     style=dict(
-                                        height="48px",
+                                        height="48px"
                                     )
                                 ),
 
@@ -186,8 +187,8 @@ app.layout = html.Div(
                             figure=create_graph(
                                 data=[
                                     go.Scatter(
-                                        x=yf.download(symbol, start="2016-01-04", end="2017-12-29", progress=False)["Close"].index,
-                                        y=yf.download(symbol, start="2016-01-04", end="2017-12-29", progress=False)["Close"].values,
+                                        x=yf.download(symbol, start="2016-01-06", end="2017-12-29", progress=False)["Close"].index,
+                                        y=yf.download(symbol, start="2016-01-06", end="2017-12-29", progress=False)["Close"].values,
                                         mode="lines",
                                         name=symbol,
                                         line=dict(
@@ -197,7 +198,7 @@ app.layout = html.Div(
                                 ],
 
                                 selected_tickers=["TSLA", "AAPL"]
-                            ),
+                            )
                         )
                     ]
                 )
@@ -346,7 +347,9 @@ def callback_stats(state_data):
     if state_data is None:
         raise dash.exceptions.PreventUpdate
 
+
     obj = json.loads(state_data)
+
     selected_tickers = [list(item.keys())[0] for item in obj['data']]
 
     meta = []

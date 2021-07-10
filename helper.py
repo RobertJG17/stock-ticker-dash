@@ -70,11 +70,11 @@ def create_graph(data, selected_tickers):
           layout=go.Layout(
                 title="Closing Prices for: {}".format(', '.join(selected_tickers)),
                 xaxis=dict(
-                    title="Date",
+                    title="Date"
                 ),
 
                 yaxis=dict(
-                    title="Closing Price",
+                    title="Closing Price"
                 ),
 
                 plot_bgcolor="black",
