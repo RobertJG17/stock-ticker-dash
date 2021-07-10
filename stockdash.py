@@ -36,7 +36,7 @@ stocks_df = stocks_df.set_index("symbol")
 # Grabbing the ticker symbols from the DataFrame Index
 tickers = stocks_df.index
 
-dl = yf.Ticker("AAPL").history()
+
 
 # SECTION: Main application layout
 
