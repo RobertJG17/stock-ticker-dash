@@ -380,7 +380,7 @@ def callback_stats(state_data):
 # SECTION: Run Server | localhost spec - '0.0.0.0', 5000, debug=True
 
 if __name__ == '__main__':
-    app.run_server('0.0.0.0', 5000, debug=True)
+    app.run_server()
 
 
 
